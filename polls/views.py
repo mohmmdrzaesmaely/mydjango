@@ -1,19 +1,23 @@
 from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from .models import Question
+from django.core import serializers
 
 
 def index(request):
-    latest_question_list = Question.objects.order_by('-pub_date')[:5]
-    context = {
-        'latest_question_list': latest_question_list
-    }
-    return render(request, 'polls/index.html', context)
+    data = serializers.serialize("json", Question.objects.all())
+    return HttpResponse(data)
 
 
 def detail(request, question_id):
     question = get_object_or_404(Question, pk=question_id)
-    return render(request, 'polls/detail.html', {'question': question})
+    data = {
+        'question_id': question_id,
+        'question_text': question.question_text,
+        'pub_date': question.pub_date
+    }
+
+    return JsonResponse(data)
 
 
 def results(request, question_id):
